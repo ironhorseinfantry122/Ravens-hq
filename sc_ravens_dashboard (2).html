@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Ravens — 4040 Baseball Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ravens-black: #0a0a0f;
+    --ravens-dark: #12121a;
+    --ravens-card: #1a1a26;
+    --ravens-border: #2a2a3e;
+    --ravens-red: #cc2936;
+    --ravens-red-glow: #cc293640;
+    --ravens-gold: #f4b942;
+    --ravens-gold-dim: #f4b94240;
+    --ravens-blue: #3a7bd5;
+    --ravens-teal: #1d9e75;
+    --ravens-text: #e8e8f0;
+    --ravens-muted: #7a7a9a;
+    --ravens-dim: #3a3a5a;
+    --tier-primary: #1d9e75;
+    --tier-border: #f4b942;
+    --tier-below: #cc2936;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--ravens-black);
+    color: var(--ravens-text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a0a14 50%, #0a0a1a 100%);
+    border-bottom: 1px solid var(--ravens-border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--ravens-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+    letter-spacing: -1px;
+    box-shadow: 0 0 20px var(--ravens-red-glow);
+  }
+  .logo-text { font-family: 'Barlow Condensed', sans-serif; }
+  .logo-text .team { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: white; }
+  .logo-text .sub { font-size: 11px; font-weight: 400; color: var(--ravens-muted); letter-spacing: 3px; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .season-badge {
+    background: var(--ravens-gold-dim);
+    border: 1px solid var(--ravens-gold);
+    color: var(--ravens-gold);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-tab {
+    background: none;
+    border: none;
+    color: var(--ravens-muted);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .nav-tab:hover { color: var(--ravens-text); background: var(--ravens-card); }
+  .nav-tab.active { color: white; background: var(--ravens-red); }
+
+  /* MAIN */
+  .main { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* STAT CARDS ROW */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card.red::before { background: var(--ravens-red); }
+  .stat-card.gold::before { background: var(--ravens-gold); }
+  .stat-card.teal::before { background: var(--ravens-teal); }
+  .stat-card.blue::before { background: var(--ravens-blue); }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--ravens-muted); margin-bottom: 6px; }
+  .stat-value { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: white; }
+  .stat-sub { font-size: 11px; color: var(--ravens-muted); margin-top: 2px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: white;
+  }
+  .section-line { flex: 1; height: 1px; background: var(--ravens-border); }
+  .section-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-red { background: var(--ravens-red-glow); color: var(--ravens-red); border: 1px solid var(--ravens-red); }
+  .badge-gold { background: var(--ravens-gold-dim); color: var(--ravens-gold); border: 1px solid var(--ravens-gold); }
+  .badge-teal { background: #1d9e7520; color: var(--ravens-teal); border: 1px solid var(--ravens-teal); }
+  .badge-blue { background: #3a7bd520; color: var(--ravens-blue); border: 1px solid var(--ravens-blue); }
+
+  /* PLAYER GRID */
+  .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .player-card {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-card:hover { border-color: var(--ravens-red); transform: translateY(-2px); }
+  .player-card.selected { border-color: var(--ravens-gold); background: #1a1a26; }
+  .player-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .player-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .avatar-red { background: var(--ravens-red-glow); color: var(--ravens-red); border: 1px solid var(--ravens-red); }
+  .avatar-gold { background: var(--ravens-gold-dim); color: var(--ravens-gold); border: 1px solid var(--ravens-gold); }
+  .avatar-teal { background: #1d9e7530; color: var(--ravens-teal); border: 1px solid var(--ravens-teal); }
+  .avatar-blue { background: #3a7bd530; color: var(--ravens-blue); border: 1px solid var(--ravens-blue); }
+  .avatar-gray { background: #3a3a5a30; color: var(--ravens-muted); border: 1px solid var(--ravens-dim); }
+  .player-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: white; letter-spacing: 0.5px; }
+  .player-meta { font-size: 11px; color: var(--ravens-muted); }
+  .ratings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .rating-item { background: var(--ravens-black); border-radius: 5px; padding: 4px 6px; text-align: center; }
+  .rating-label { font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--ravens-muted); text-transform: uppercase; }
+  .rating-value { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
+  .rv-elite { color: #1d9e75; }
+  .rv-good { color: #f4b942; }
+  .rv-avg { color: var(--ravens-text); }
+  .rv-below { color: #cc2936; }
+
+  /* PITCHER TABLE */
+  .pitcher-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+  .pitcher-table th {
+    background: var(--ravens-black);
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ravens-muted);
+    border-bottom: 1px solid var(--ravens-border);
+  }
+  .pitcher-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ravens-border);
+    font-size: 13px;
+  }
+  .pitcher-table tr:hover td { background: var(--ravens-dark); }
+  .pitcher-table tr:last-child td { border-bottom: none; }
+  .tier-pill {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .tier-primary-pill { background: #1d9e7520; color: var(--ravens-teal); border: 1px solid var(--ravens-teal); }
+  .tier-border-pill { background: #f4b94220; color: var(--ravens-gold); border: 1px solid var(--ravens-gold); }
+  .tier-below-pill { background: var(--ravens-red-glow); color: var(--ravens-red); border: 1px solid var(--ravens-red); }
+  .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; }
+  .num-elite { color: var(--ravens-teal); }
+  .num-good { color: var(--ravens-gold); }
+  .num-bad { color: var(--ravens-red); }
+
+  /* LINEUP */
+  .lineup-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+  .lineup-list { background: var(--ravens-card); border: 1px solid var(--ravens-border); border-radius: 10px; overflow: hidden; }
+  .lineup-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--ravens-border);
+    transition: background 0.15s;
+  }
+  .lineup-row:last-child { border-bottom: none; }
+  .lineup-row:hover { background: var(--ravens-dark); }
+  .order-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ravens-red);
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lineup-pos {
+    background: var(--ravens-black);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--ravens-muted);
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lineup-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: white; flex: 1; }
+  .lineup-stats { display: flex; gap: 12px; }
+  .ls { font-size: 11px; color: var(--ravens-muted); }
+  .ls span { color: var(--ravens-text); font-weight: 600; }
+
+  /* PRIORITIES */
+  .priority-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; }
+  .priority-item {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .priority-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-red { background: var(--ravens-red); box-shadow: 0 0 8px var(--ravens-red); }
+  .dot-gold { background: var(--ravens-gold); box-shadow: 0 0 8px var(--ravens-gold); }
+  .dot-teal { background: var(--ravens-teal); }
+  .priority-text { flex: 1; font-size: 13px; color: var(--ravens-text); }
+  .priority-text strong { color: white; }
+  .priority-tag { font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+
+  /* RULES PANEL */
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .rule-card {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .rule-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ravens-border);
+  }
+  .rule-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 12px; border-bottom: 1px solid var(--ravens-border); }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-key { color: var(--ravens-muted); }
+  .rule-val { color: white; font-weight: 600; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; }
+  .rule-val.good { color: var(--ravens-teal); }
+  .rule-val.warn { color: var(--ravens-gold); }
+  .rule-val.bad { color: var(--ravens-red); }
+
+  /* AI ASSISTANT */
+  .ai-panel { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+  .ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 10px 10px 0 0;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ai-messages::-webkit-scrollbar { width: 4px; }
+  .ai-messages::-webkit-scrollbar-track { background: var(--ravens-black); }
+  .ai-messages::-webkit-scrollbar-thumb { background: var(--ravens-dim); border-radius: 2px; }
+  .msg { display: flex; gap: 10px; max-width: 85%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .msg-avatar.ai { background: var(--ravens-red-glow); color: var(--ravens-red); border: 1px solid var(--ravens-red); }
+  .msg-avatar.user { background: var(--ravens-gold-dim); color: var(--ravens-gold); border: 1px solid var(--ravens-gold); }
+  .msg-bubble {
+    background: var(--ravens-dark);
+    border: 1px solid var(--ravens-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ravens-text);
+  }
+  .msg.user .msg-bubble { background: var(--ravens-red-glow); border-color: var(--ravens-red); color: white; }
+  .msg-bubble strong { color: var(--ravens-gold); }
+  .msg-bubble .highlight { color: var(--ravens-teal); font-weight: 600; }
+  .msg-bubble .warn { color: var(--ravens-red); font-weight: 600; }
+  .ai-input-row {
+    display: flex;
+    gap: 8px;
+    background: var(--ravens-dark);
+    border: 1px solid var(--ravens-border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 12px;
+  }
+  .ai-input {
+    flex: 1;
+    background: var(--ravens-black);
+    border: 1px solid var(--ravens-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--ravens-text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    height: 44px;
+    min-height: 44px;
+  }
+  .ai-input:focus { border-color: var(--ravens-red); }
+  .ai-send {
+    background: var(--ravens-red);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 0 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .ai-send:hover { background: #e03040; }
+  .ai-send:disabled { opacity: 0.5; cursor: not-allowed; }
+  .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .quick-btn {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 20px;
+    color: var(--ravens-muted);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'Barlow', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { color: var(--ravens-text); border-color: var(--ravens-red); }
+  .typing { display: flex; align-items: center; gap: 4px; padding: 8px 4px; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ravens-muted); animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)} }
+
+  /* SCREENSHOT UPLOAD */
+  .upload-zone {
+    border: 2px dashed var(--ravens-border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    background: var(--ravens-black);
+  }
+  .upload-zone:hover { border-color: var(--ravens-red); background: var(--ravens-red-glow); }
+  .upload-zone p { font-size: 12px; color: var(--ravens-muted); margin-top: 4px; }
+  #screenshot-input { display: none; }
+
+  /* PROGRESS BARS */
+  .rating-bar { height: 4px; background: var(--ravens-black); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+  .rating-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+  .fill-elite { background: var(--ravens-teal); }
+  .fill-good { background: var(--ravens-gold); }
+  .fill-avg { background: var(--ravens-blue); }
+  .fill-bad { background: var(--ravens-red); }
+
+  /* ALERTS */
+  .alert { border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; display: flex; gap: 8px; align-items: flex-start; }
+  .alert-red { background: var(--ravens-red-glow); border: 1px solid var(--ravens-red); color: #ffaaaa; }
+  .alert-gold { background: var(--ravens-gold-dim); border: 1px solid var(--ravens-gold); color: #ffd080; }
+  .alert-teal { background: #1d9e7520; border: 1px solid var(--ravens-teal); color: #80e0c0; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .lineup-container { grid-template-columns: 1fr; }
+    .header { padding: 0 1rem; }
+    .main { padding: 1rem; }
+    .nav-tab { padding: 4px 8px; font-size: 11px; }
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .panel.active { animation: fadeIn 0.3s ease; }
+  .player-card { animation: fadeIn 0.3s ease both; }
+
+  /* OBP FORMULA */
+  .formula-box {
+    background: var(--ravens-black);
+    border: 1px solid var(--ravens-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    color: var(--ravens-gold);
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+  }
+
+  /* COMPARE PANEL */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .compare-card {
+    background: var(--ravens-card);
+    border: 1px solid var(--ravens-border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .compare-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--ravens-border); }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-key { font-size: 12px; color: var(--ravens-muted); }
+  .compare-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+
+  .table-wrapper { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">SCR</div>
+    <div class="logo-text">
+      <div class="team">SC RAVENS</div>
+      <div class="sub">4040 Baseball · New Production League</div>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel('overview')">Overview</button>
+    <button class="nav-tab" onclick="showPanel('lineup')">Lineup</button>
+    <button class="nav-tab" onclick="showPanel('pitching')">Pitching</button>
+    <button class="nav-tab" onclick="showPanel('prospects')">Prospects</button>
+    <button class="nav-tab" onclick="showPanel('rules')">Dev Rules</button>
+    <button class="nav-tab" onclick="showPanel('ai')">AI Coach</button>
+  </nav>
+  <div class="header-right">
+    <div class="season-badge">SEASON 2053</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- OVERVIEW PANEL -->
+  <div class="panel active" id="panel-overview">
+
+    <div class="stat-row">
+      <div class="stat-card red">
+        <div class="stat-label">Payroll Status</div>
+        <div class="stat-value">OK</div>
+        <div class="stat-sub">Under $125M limit</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Rotation Depth</div>
+        <div class="stat-value">SP1–5</div>
+        <div class="stat-sub">Elite top 5 + Lang chip</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">OBP Core</div>
+        <div class="stat-value">+5</div>
+        <div class="stat-sub">EYE 85+ players</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Closer Status</div>
+        <div class="stat-value">Peters</div>
+        <div class="stat-sub">EN 62 — monitor usage</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">CF Defense</div>
+        <div class="stat-value">77</div>
+        <div class="stat-sub">Walters — SOLVED</div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="alert alert-red">
+      <strong>🔴 CLOSER USAGE LIMIT:</strong> Peters (EN 62) must stay under 50 IP as closer or risk decline + injury. Monitor closely.
+    </div>
+    <div class="alert alert-gold">
+      <strong>🟡 URGENT — FORD EXTENSION:</strong> 4yr $3.71M is incredible value. Lock up immediately before season starts.
+    </div>
+    <div class="alert alert-gold">
+      <strong>🟡 DO NOT PROMOTE:</strong> Caldwell (upgrading until 09/10/2053) and Marcus Douglas — upgrading.
+    </div>
+    <div class="alert alert-teal">
+      <strong>🟢 CONTRACTS VOIDED:</strong> Lugo and Cherry contracts cleared. Salary relief secured.
+    </div>
+    <div class="alert alert-teal">
+      <strong>🟢 WALTERS SIGNED:</strong> CF 77 solves biggest defensive hole. All three OF positions covered above threshold.
+    </div>
+
+    <!-- PRIORITIES -->
+    <div class="section-header">
+      <div class="section-title">Season Priorities</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-red">2053</div>
+    </div>
+    <div class="priority-list">
+      <div class="priority-item">
+        <div class="priority-dot dot-red"></div>
+        <div class="priority-text"><strong>Monitor Peters usage</strong> — keep under 50 IP as closer. Rotate Horton/Villanueva to share save situations if workload spikes.</div>
+        <span class="priority-tag badge-red">Urgent</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-dot dot-gold"></div>
+        <div class="priority-text"><strong>Lock Ford extension</strong> — 4yr $3.71M is a steal for your best hitter (CH 90, PH 89). Do immediately.</div>
+        <span class="priority-tag badge-gold">High</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-dot dot-gold"></div>
+        <div class="priority-text"><strong>Sherman deal (Rush+Byrd → SB Blue Sox)</strong> — age 22 SS with EYE 94. Long-term SS answer. Becker is 1yr bridge only.</div>
+        <span class="priority-tag badge-gold">High</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-dot dot-gold"></div>
+        <div class="priority-text"><strong>Trade Lang</strong> — EN 96, BP 96 primary chip. Target: closer arm (CO 84+, BP 94+, EN below 40) or future SS help.</div>
+        <span class="priority-tag badge-gold">High</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-dot dot-teal"></div>
+        <div class="priority-text"><strong>Clarke extension (4yr $4.49M)</strong> — solid bench CF/depth now that Walters is starter. Reasonable value.</div>
+        <span class="priority-tag badge-teal">Medium</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-dot dot-teal"></div>
+        <div class="priority-text"><strong>Hancock extension (4yr $3.65M)</strong> — CO 85, BP 97 in bullpen at great value. Worth securing.</div>
+        <span class="priority-tag badge-teal">Medium</span>
+      </div>
+    </div>
+
+    <!-- TRADE TARGETS -->
+    <div class="section-header">
+      <div class="section-title">Trade Intelligence</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="player-grid">
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-red">SB</div>
+          <div><div class="player-name">Tedd Sherman</div><div class="player-meta">SS · SB Blue Sox · Age 22</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">CH</div><div class="rating-value rv-good">87</div></div>
+          <div class="rating-item"><div class="rating-label">EYE</div><div class="rating-value rv-elite">94</div></div>
+          <div class="rating-item"><div class="rating-label">SS</div><div class="rating-value rv-elite">75</div></div>
+          <div class="rating-item"><div class="rating-label">K</div><div class="rating-value rv-elite">94</div></div>
+          <div class="rating-item"><div class="rating-label">Age</div><div class="rating-value rv-elite">22</div></div>
+          <div class="rating-item"><div class="rating-label">$</div><div class="rating-value rv-elite">250K</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-gold section-badge">Offer: Rush + Byrd</div>
+      </div>
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-gold">STL</div>
+          <div><div class="player-name">STL Cardinals</div><div class="player-meta">Rebuilding · Needs pitching badly</div></div>
+        </div>
+        <div style="font-size:12px; color: var(--ravens-muted); line-height: 1.7;">
+          <div>Has: Woods Sherwynd 2B (EYE 84)</div>
+          <div>Has: Ibarra Damon 3B prospect (EYE 87)</div>
+          <div style="color: var(--ravens-gold); margin-top:6px; font-weight: 600;">Send Lang → target OF or closer arm</div>
+        </div>
+      </div>
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-teal">WPC</div>
+          <div><div class="player-name">WPC Bass</div><div class="player-meta">Alejandro Sanchez 3B</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">PH</div><div class="rating-value rv-elite">94</div></div>
+          <div class="rating-item"><div class="rating-label">Age</div><div class="rating-value rv-avg">30</div></div>
+          <div class="rating-item"><div class="rating-label">3B</div><div class="rating-value rv-good">?</div></div>
+        </div>
+        <div style="margin-top:8px; font-size:11px; color: var(--ravens-red);">Asked for Hernandez — too steep</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINEUP PANEL -->
+  <div class="panel" id="panel-lineup">
+    <div class="section-header">
+      <div class="section-title">Starting Lineup — 2053</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-gold">Offense First</div>
+    </div>
+
+    <div class="lineup-container">
+      <div>
+        <div class="lineup-list">
+          <div class="lineup-row"><div class="order-num">1</div><div class="lineup-pos">CF</div><div class="lineup-name">Walters, Wilburn</div><div class="lineup-stats"><div class="ls">CH <span>90</span></div><div class="ls">EYE <span>67</span></div><div class="ls">CF <span>77</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">2</div><div class="lineup-pos">2B</div><div class="lineup-name">Ford, Obadiah</div><div class="lineup-stats"><div class="ls">CH <span>90</span></div><div class="ls">PH <span>89</span></div><div class="ls">EYE <span>74</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">3</div><div class="lineup-pos">DH</div><div class="lineup-name">Johnson, Garey</div><div class="lineup-stats"><div class="ls">CH <span>87</span></div><div class="ls">PH <span>91</span></div><div class="ls">EYE <span>85</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">4</div><div class="lineup-pos">LF</div><div class="lineup-name">Lu, Geri</div><div class="lineup-stats"><div class="ls">CH <span>80</span></div><div class="ls">PH <span>92</span></div><div class="ls">LF <span>65</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">5</div><div class="lineup-pos">3B</div><div class="lineup-name">Hurst, Shaw</div><div class="lineup-stats"><div class="ls">CH <span>87</span></div><div class="ls">PH <span>68</span></div><div class="ls">EYE <span>60</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">6</div><div class="lineup-pos">RF</div><div class="lineup-name">Crosby, Prentiss</div><div class="lineup-stats"><div class="ls">CH <span>87</span></div><div class="ls">EYE <span>87</span></div><div class="ls">RF <span>81</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">7</div><div class="lineup-pos">1B</div><div class="lineup-name">Ruiz, Pavel</div><div class="lineup-stats"><div class="ls">CH <span>86</span></div><div class="ls">EYE <span>95</span></div><div class="ls">1B <span>81</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">8</div><div class="lineup-pos">C</div><div class="lineup-name">González, Victor</div><div class="lineup-stats"><div class="ls">CH <span>87</span></div><div class="ls">EYE <span>91</span></div><div class="ls">C <span>81</span></div></div></div>
+          <div class="lineup-row"><div class="order-num">9</div><div class="lineup-pos">SS</div><div class="lineup-name">Becker, Gaven</div><div class="lineup-stats"><div class="ls">CH <span>85</span></div><div class="ls">EYE <span>98</span></div><div class="ls">SS <span>70</span></div></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header" style="margin-bottom:0.75rem;">
+          <div class="section-title" style="font-size:14px;">Bench</div>
+          <div class="section-line"></div>
+        </div>
+        <div class="lineup-list" style="margin-bottom:1.5rem;">
+          <div class="lineup-row"><div class="lineup-pos">C</div><div class="lineup-name">Johnson, Garey</div><div class="lineup-stats"><div class="ls">PH <span>91</span></div></div></div>
+          <div class="lineup-row"><div class="lineup-pos">2B</div><div class="lineup-name">Barnett, Rich</div><div class="lineup-stats"><div class="ls">2B <span>77</span></div></div></div>
+          <div class="lineup-row"><div class="lineup-pos">SS</div><div class="lineup-name">Horne, Carter</div><div class="lineup-stats"><div class="ls">SS <span>70</span></div></div></div>
+          <div class="lineup-row"><div class="lineup-pos">SS</div><div class="lineup-name">Dorsey, Lockwood</div><div class="lineup-stats"><div class="ls">SS <span>60</span></div></div></div>
+          <div class="lineup-row"><div class="lineup-pos">CF</div><div class="lineup-name">Clarke, Mortie</div><div class="lineup-stats"><div class="ls">CF <span>58</span></div><div class="ls">EYE <span>79</span></div></div></div>
+        </div>
+
+        <div class="formula-box">
+          OBP ≈ .300 + ((EYE − 50) / 49) × .100
+          <div style="font-size:11px; color: var(--ravens-muted); margin-top:6px; font-family: 'Barlow', sans-serif;">
+            Becker EYE 98 → est. .395 · Ruiz EYE 95 → est. .390 · González EYE 91 → est. .382
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-bottom:0.75rem;">
+          <div class="section-title" style="font-size:14px;">Fielding Status</div>
+          <div class="section-line"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div class="compare-row"><span class="compare-key">CF Walters</span><span class="rating-value rv-elite">77 ✓</span></div>
+          <div class="compare-row"><span class="compare-key">RF Crosby</span><span class="rating-value rv-elite">81 ✓</span></div>
+          <div class="compare-row"><span class="compare-key">LF Lu</span><span class="rating-value rv-below">65 ✗ (elite PH exception)</span></div>
+          <div class="compare-row"><span class="compare-key">SS Becker</span><span class="rating-value rv-elite">70 ✓</span></div>
+          <div class="compare-row"><span class="compare-key">2B Ford</span><span class="rating-value rv-below">60 ✗ (elite bat exception)</span></div>
+          <div class="compare-row"><span class="compare-key">3B Hurst</span><span class="rating-value rv-elite">70 ✓</span></div>
+          <div class="compare-row"><span class="compare-key">C González</span><span class="rating-value rv-elite">81 ✓</span></div>
+          <div class="compare-row"><span class="compare-key">1B Ruiz</span><span class="rating-value rv-elite">81 ✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PITCHING PANEL -->
+  <div class="panel" id="panel-pitching">
+    <div class="section-header">
+      <div class="section-title">Rotation</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-teal">5 Primary Arms</div>
+    </div>
+    <div class="table-wrapper">
+    <table class="pitcher-table">
+      <thead><tr><th>Slot</th><th>Player</th><th>Age</th><th>EN</th><th>CO</th><th>BP</th><th>K</th><th>ERA '52</th><th>Tier</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SP1</strong></td><td>Hernandez, Monroe</td><td>31</td><td class="stat-num num-elite">78</td><td class="stat-num num-elite">94</td><td class="stat-num num-elite">99</td><td class="stat-num num-elite">85</td><td class="stat-num num-elite">3.29</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="font-size:11px; color:var(--ravens-muted);">ACE. Career 295 GS.</td></tr>
+        <tr><td><strong>SP2</strong></td><td>Torres, Krishna</td><td>31</td><td class="stat-num num-elite">95</td><td class="stat-num num-elite">95</td><td class="stat-num num-elite">97</td><td class="stat-num num-elite">86</td><td class="stat-num num-elite">3.29</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="font-size:11px; color:var(--ravens-muted);">Elite endurance</td></tr>
+        <tr><td><strong>SP3</strong></td><td>Serrano, Jorge</td><td>32</td><td class="stat-num num-good">85</td><td class="stat-num num-elite">96</td><td class="stat-num num-elite">95</td><td class="stat-num num-good">79</td><td class="stat-num num-elite">2.88</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="font-size:11px; color:var(--ravens-muted);">CO 96 best on staff</td></tr>
+        <tr><td><strong>SP4</strong></td><td>Poole, Bartel</td><td>27</td><td class="stat-num num-good">87</td><td class="stat-num num-good">92</td><td class="stat-num num-elite">95</td><td class="stat-num num-good">68</td><td class="stat-num num-elite">2.49</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="font-size:11px; color:var(--ravens-muted);">SL 95 best pitch</td></tr>
+        <tr><td><strong>SP5 🔄</strong></td><td>Lang, Frederik</td><td>32</td><td class="stat-num num-elite">96</td><td class="stat-num num-good">89</td><td class="stat-num num-elite">96</td><td class="stat-num num-bad">44</td><td class="stat-num num-elite">1.97</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="font-size:11px; color:var(--ravens-gold);">TRADE CHIP</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Bullpen</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-gold">Peters — Monitor 50IP</div>
+    </div>
+    <div class="table-wrapper">
+    <table class="pitcher-table">
+      <thead><tr><th>Role</th><th>Player</th><th>Age</th><th>EN</th><th>CO</th><th>BP</th><th>ERA '52</th><th>Tier</th><th>IP Limit</th></tr></thead>
+      <tbody>
+        <tr><td><strong>LR/Opener</strong></td><td>Spence, F.P.</td><td>32</td><td class="stat-num num-good">73</td><td class="stat-num num-good">90</td><td class="stat-num num-elite">99</td><td class="stat-num num-elite">3.27</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td>~100 IP</td></tr>
+        <tr><td><strong>MR1</strong></td><td>Hancock, Anatoly</td><td>23</td><td class="stat-num num-good">68</td><td class="stat-num num-good">85</td><td class="stat-num num-elite">97</td><td class="stat-num num-elite">2.84</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td>~75 IP</td></tr>
+        <tr><td><strong>MR2</strong></td><td>Glock, Seth</td><td>34</td><td class="stat-num num-bad">42</td><td class="stat-num num-good">89</td><td class="stat-num num-elite">95</td><td class="stat-num num-elite">2.86</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td>Last season</td></tr>
+        <tr><td><strong>SR1 / MR</strong></td><td>Villanueva, Regan</td><td>29</td><td class="stat-num num-good">70</td><td class="stat-num num-elite">97</td><td class="stat-num num-elite">98</td><td class="stat-num num-elite">1.74</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td>Relief role ✓</td></tr>
+        <tr><td><strong>SR2</strong></td><td>Horton, Sutton</td><td>31</td><td class="stat-num num-bad">55</td><td class="stat-num num-elite">98</td><td class="stat-num num-elite">96</td><td class="stat-num num-elite">1.54</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td>~75 IP</td></tr>
+        <tr><td><strong>CL ⚠️</strong></td><td>Peters, Yehudi</td><td>29</td><td class="stat-num num-good" style="color:var(--ravens-gold)">62</td><td class="stat-num num-good">87</td><td class="stat-num num-elite">99</td><td class="stat-num num-elite">2.31</td><td><span class="tier-pill tier-primary-pill">Primary</span></td><td style="color:var(--ravens-gold); font-weight:600;">MAX 50 IP</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="alert alert-gold">
+      <strong>Closer note (developer confirmed):</strong> Peters (EN 62) has more pitches in tank than ideal closer. Works fine for save situations but risk begins above 50 IP. Rotate Horton/Villanueva to protect him.
+    </div>
+
+    <div class="section-header" style="margin-top:1.5rem;">
+      <div class="section-title">Tier Reference</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-teal);">Primary Tier</div>
+        <div class="rule-item"><span class="rule-key">CO minimum</span><span class="rule-val good">86+</span></div>
+        <div class="rule-item"><span class="rule-key">BP minimum</span><span class="rule-val good">95+</span></div>
+        <div class="rule-item"><span class="rule-key">Pay above min?</span><span class="rule-val good">YES</span></div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-gold);">Secondary Tier</div>
+        <div class="rule-item"><span class="rule-key">CO minimum</span><span class="rule-val warn">84+</span></div>
+        <div class="rule-item"><span class="rule-key">BP minimum</span><span class="rule-val warn">94+</span></div>
+        <div class="rule-item"><span class="rule-key">Pay above min?</span><span class="rule-val bad">NO — League min only</span></div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-muted);">Endurance Roles</div>
+        <div class="rule-item"><span class="rule-key">Starter (SP)</span><span class="rule-val good">EN 73+</span></div>
+        <div class="rule-item"><span class="rule-key">Long Reliever</span><span class="rule-val warn">EN 60–72 (~100 IP)</span></div>
+        <div class="rule-item"><span class="rule-key">Middle Reliever</span><span class="rule-val warn">EN 40–59 (~75 IP)</span></div>
+        <div class="rule-item"><span class="rule-key">Short Reliever</span><span class="rule-val bad">EN below 40 (~50 IP)</span></div>
+        <div class="rule-item"><span class="rule-key">Closer ideal</span><span class="rule-val bad">EN below 40</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROSPECTS PANEL -->
+  <div class="panel" id="panel-prospects">
+    <div class="section-header">
+      <div class="section-title">Development Watch</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-red">Do Not Promote</div>
+    </div>
+
+    <div class="alert alert-red">
+      <strong>DO NOT PROMOTE:</strong> Caldwell (upgrading until 09/10/2053) and Marcus Douglas (upgrading). Promoting cancels the upgrade.
+    </div>
+
+    <div class="player-grid">
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-red">GC</div>
+          <div><div class="player-name">Caldwell, Giovanne</div><div class="player-meta">SP Prospect · Age 19 · DO NOT PROMOTE</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">EN now→</div><div class="rating-value rv-below">52→73</div></div>
+          <div class="rating-item"><div class="rating-label">CO now→</div><div class="rating-value rv-below">58→84</div></div>
+          <div class="rating-item"><div class="rating-label">BP now→</div><div class="rating-value rv-good">65→93</div></div>
+          <div class="rating-item"><div class="rating-label">K now→</div><div class="rating-value rv-elite">86→93</div></div>
+          <div class="rating-item"><div class="rating-label">FB ceil</div><div class="rating-value rv-elite">97</div></div>
+          <div class="rating-item"><div class="rating-label">Done</div><div class="rating-value rv-good">9/10/53</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-red section-badge">Upgrading — wait until 09/10/2053</div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-red">MD</div>
+          <div><div class="player-name">Douglas, Marcus</div><div class="player-meta">3B · Age 27 · DO NOT PROMOTE</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">CH</div><div class="rating-value rv-avg">82</div></div>
+          <div class="rating-item"><div class="rating-label">PH</div><div class="rating-value rv-below">45</div></div>
+          <div class="rating-item"><div class="rating-label">EYE</div><div class="rating-value rv-good">73</div></div>
+          <div class="rating-item"><div class="rating-label">3B</div><div class="rating-value rv-below">55</div></div>
+          <div class="rating-item"><div class="rating-label">K</div><div class="rating-value rv-good">73</div></div>
+          <div class="rating-item"><div class="rating-label">$</div><div class="rating-value rv-avg">6.35M</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-red section-badge">Upgrading — do not promote</div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-blue">AH</div>
+          <div><div class="player-name">Hill, Arne</div><div class="player-meta">SS Prospect · Age 21</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">CH →</div><div class="rating-value rv-good">63→81</div></div>
+          <div class="rating-item"><div class="rating-label">EYE</div><div class="rating-value rv-good">75</div></div>
+          <div class="rating-item"><div class="rating-label">SS</div><div class="rating-value rv-good">69</div></div>
+          <div class="rating-item"><div class="rating-label">SP</div><div class="rating-value rv-good">82</div></div>
+          <div class="rating-item"><div class="rating-label">PH →</div><div class="rating-value rv-below">47→54</div></div>
+          <div class="rating-item"><div class="rating-label">ETA</div><div class="rating-value rv-avg">2-3yr</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-blue section-badge">SS prospect — developing</div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-blue">BO</div>
+          <div><div class="player-name">Odonnell, Barny</div><div class="player-meta">SS Prospect · Age 21</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">CH →</div><div class="rating-value rv-good">65→81</div></div>
+          <div class="rating-item"><div class="rating-label">EYE ceil</div><div class="rating-value rv-elite">85</div></div>
+          <div class="rating-item"><div class="rating-label">SS</div><div class="rating-value rv-avg">62</div></div>
+          <div class="rating-item"><div class="rating-label">PH →</div><div class="rating-value rv-below">57→63</div></div>
+          <div class="rating-item"><div class="rating-label">SP</div><div class="rating-value rv-good">76</div></div>
+          <div class="rating-item"><div class="rating-label">ETA</div><div class="rating-value rv-avg">2-3yr</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-blue section-badge">SS prospect — developing</div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-avatar avatar-teal">MC</div>
+          <div><div class="player-name">Cisneros, Martyn</div><div class="player-meta">SP · Age 29 · Ready</div></div>
+        </div>
+        <div class="ratings-grid">
+          <div class="rating-item"><div class="rating-label">EN</div><div class="rating-value rv-good">79</div></div>
+          <div class="rating-item"><div class="rating-label">CO</div><div class="rating-value rv-good">86</div></div>
+          <div class="rating-item"><div class="rating-label">BP</div><div class="rating-value rv-elite">95</div></div>
+          <div class="rating-item"><div class="rating-label">K</div><div class="rating-value rv-good">87</div></div>
+          <div class="rating-item"><div class="rating-label">ERA</div><div class="rating-value rv-good">3.98</div></div>
+          <div class="rating-item"><div class="rating-label">$</div><div class="rating-value rv-good">5.92M</div></div>
+        </div>
+        <div style="margin-top:8px;" class="badge-teal section-badge">SP6 ready when Lang traded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES PANEL -->
+  <div class="panel" id="panel-rules">
+    <div class="section-header">
+      <div class="section-title">Developer Confirmed Rules</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-red">Source of Truth</div>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-gold);">Hitting</div>
+        <div class="rule-item"><span class="rule-key">CH 85 baseline OBP</span><span class="rule-val warn">~.250 AVG</span></div>
+        <div class="rule-item"><span class="rule-key">EYE 99 adds to OBP</span><span class="rule-val good">+.100</span></div>
+        <div class="rule-item"><span class="rule-key">EYE 50 adds to OBP</span><span class="rule-val bad">almost nothing</span></div>
+        <div class="rule-item"><span class="rule-key">PH minimum</span><span class="rule-val warn">never below 40</span></div>
+        <div class="rule-item"><span class="rule-key">PH target</span><span class="rule-val good">always try 50+</span></div>
+        <div class="rule-item"><span class="rule-key">PH function</span><span class="rule-val">% hits → HR/XBH</span></div>
+        <div class="rule-item"><span class="rule-key">SP helps with</span><span class="rule-val">XBH + SB attempts</span></div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-teal);">Defense</div>
+        <div class="rule-item"><span class="rule-key">Rating 50</span><span class="rule-val warn">perfectly average</span></div>
+        <div class="rule-item"><span class="rule-key">Dev target all starters</span><span class="rule-val good">70+</span></div>
+        <div class="rule-item"><span class="rule-key">Below 70 acceptable if</span><span class="rule-val warn">elite offense</span></div>
+        <div class="rule-item"><span class="rule-key">Priority positions</span><span class="rule-val good">OF, SS, 2B</span></div>
+        <div class="rule-item"><span class="rule-key">Elite offense exception</span><span class="rule-val">CH 95/PH 97 ok</span></div>
+        <div class="rule-item"><span class="rule-key">Current rating includes</span><span class="rule-val">range + glove</span></div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-red);">Pitching</div>
+        <div class="rule-item"><span class="rule-key">BP limits</span><span class="rule-val">hits allowed</span></div>
+        <div class="rule-item"><span class="rule-key">CO limits</span><span class="rule-val">walks + location</span></div>
+        <div class="rule-item"><span class="rule-key">Primary: CO min</span><span class="rule-val good">86+</span></div>
+        <div class="rule-item"><span class="rule-key">Primary: BP min</span><span class="rule-val good">95+</span></div>
+        <div class="rule-item"><span class="rule-key">Secondary: CO min</span><span class="rule-val warn">84+</span></div>
+        <div class="rule-item"><span class="rule-key">Secondary: BP min</span><span class="rule-val warn">94+</span></div>
+        <div class="rule-item"><span class="rule-key">Secondary pay</span><span class="rule-val bad">League min ONLY</span></div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-blue);">General Rules</div>
+        <div class="rule-item"><span class="rule-key">Payroll curse threshold</span><span class="rule-val bad">$150M+</span></div>
+        <div class="rule-item"><span class="rule-key">Safe payroll max</span><span class="rule-val good">under $125M</span></div>
+        <div class="rule-item"><span class="rule-key">Upgrade rule</span><span class="rule-val warn">stay in minors</span></div>
+        <div class="rule-item"><span class="rule-key">Human trades</span><span class="rule-val good">do first (↑ SIM value)</span></div>
+        <div class="rule-item"><span class="rule-key">Position development cost</span><span class="rule-val warn">$5M cash</span></div>
+        <div class="rule-item"><span class="rule-key">Voided SB contracts</span><span class="rule-val">cosmetic — ignore</span></div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-muted);">OBP Formula</div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--ravens-gold); margin-bottom:8px;">
+          OBP ≈ .300 + ((EYE − 50) / 49) × .100
+        </div>
+        <div class="rule-item"><span class="rule-key">Becker EYE 98</span><span class="rule-val good">est. .395</span></div>
+        <div class="rule-item"><span class="rule-key">Ruiz EYE 95</span><span class="rule-val good">est. .390</span></div>
+        <div class="rule-item"><span class="rule-key">González EYE 91</span><span class="rule-val good">est. .382</span></div>
+        <div class="rule-item"><span class="rule-key">Crosby EYE 87</span><span class="rule-val good">est. .375</span></div>
+        <div class="rule-item"><span class="rule-key">Ford EYE 74</span><span class="rule-val warn">est. .349</span></div>
+        <div class="rule-item"><span class="rule-key">CH below 85 penalty</span><span class="rule-val bad">hurts base OBP</span></div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-title" style="color:var(--ravens-muted);">Closer Rules (Dev Confirmed)</div>
+        <div class="rule-item"><span class="rule-key">Ideal closer EN</span><span class="rule-val bad">below 40</span></div>
+        <div class="rule-item"><span class="rule-key">Peters EN 62 works if</span><span class="rule-val warn">under 50 IP</span></div>
+        <div class="rule-item"><span class="rule-key">Used normally in saves</span><span class="rule-val good">yes — short bursts</span></div>
+        <div class="rule-item"><span class="rule-key">Risk above</span><span class="rule-val bad">50 IP / season</span></div>
+        <div class="rule-item"><span class="rule-key">EN 62 = pitch tank</span><span class="rule-val warn">more available</span></div>
+        <div class="rule-item"><span class="rule-key">Solution</span><span class="rule-val">rotate Horton/Vil.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI COACH PANEL -->
+  <div class="panel" id="panel-ai">
+    <div class="section-header">
+      <div class="section-title">Ravens AI Coach</div>
+      <div class="section-line"></div>
+      <div class="section-badge badge-red">Powered by Claude</div>
+    </div>
+
+    <div class="alert alert-teal" style="margin-bottom:1rem;">
+      Your AI Coach knows all dev-confirmed rules, your full roster, trade history, and 2053 priorities. Ask anything — or upload a screenshot to analyze a player.
+    </div>
+
+    <div class="quick-btns" id="quick-btns">
+      <button class="quick-btn" onclick="quickAsk('Should I extend Ford right now?')">Ford extension?</button>
+      <button class="quick-btn" onclick="quickAsk('How do I protect Peters from overuse as closer?')">Peters closer usage</button>
+      <button class="quick-btn" onclick="quickAsk('What should I offer SB Blue Sox for Sherman?')">Sherman trade</button>
+      <button class="quick-btn" onclick="quickAsk('Who should I trade Lang to and what should I ask for?')">Trade Lang</button>
+      <button class="quick-btn" onclick="quickAsk('What are my biggest roster weaknesses heading into 2053?')">Roster weaknesses</button>
+      <button class="quick-btn" onclick="quickAsk('Evaluate a free agent: give me the checklist I should use')">FA checklist</button>
+    </div>
+
+    <div class="ai-messages" id="ai-messages">
+      <div class="msg">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-bubble">
+          Welcome back, GM. I'm fully loaded with your <strong>SC Ravens 2053 situation</strong>. I know your roster ratings, dev-confirmed rules, trade history, contract details, and all priorities.<br><br>
+          <span class="highlight">Key things to know right now:</span><br>
+          • <strong>Lock Ford's extension immediately</strong> — 4yr $3.71M is a steal<br>
+          • Peters works as closer but watch the <span class="warn">50 IP limit</span><br>
+          • Walters signs solves CF defense (CF 77)<br>
+          • Lang is your primary trade chip — target a closer or SS<br><br>
+          Ask me anything or upload a screenshot to analyze a player.
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 8px 0;">
+      <label class="upload-zone" for="screenshot-input" onclick="document.getElementById('screenshot-input').click()">
+        <div style="font-size:20px; margin-bottom:4px;">📸</div>
+        <div style="font-size:13px; color:var(--ravens-text); font-weight:500;">Upload player screenshot to analyze</div>
+        <p>Tap to select image — AI will evaluate against your roster needs</p>
+      </label>
+      <input type="file" id="screenshot-input" accept="image/*" onchange="handleScreenshot(this)">
+    </div>
+
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="ai-input" placeholder="Ask your AI Coach anything about roster decisions, trades, rules..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+      <button class="ai-send" id="ai-send-btn" onclick="sendMessage()">Send ↗</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SYSTEM_PROMPT = `You are the AI Coach for the SC Ravens, a 4040Baseball team managed by a human GM. You have complete knowledge of:
+
+DEVELOPER CONFIRMED RULES:
+HITTING: CH 85 = ~.250 AVG baseline. EYE 99 adds ~.100 OBP. EYE 50 adds almost nothing. PH = % of hits becoming HR/XBH, minimum never below 40, always try 50+. SP helps XBH and SB. OBP formula: approx .300 + ((EYE-50)/49) x .100
+DEFENSE: 50 = average. 70+ = dev target for starters. Below 70 only acceptable for elite offense. OF, SS, 2B prioritized. Elite offense (CH95/PH97) overrides poor fielding.
+PITCHING: BP limits hits. CO limits walks. Primary tier (SP/main RP): CO 86+, BP 95+. Secondary tier: CO 84+, BP 94+ — NEVER pay above league minimum for secondary. EN 73+ = starter. EN 60-72 = LR ~100IP. EN 40-59 = MR ~75IP. EN below 40 = SR ~50IP. Ideal closer: EN below 40.
+CLOSER RULE (dev confirmed): Peters EN 62 works as closer in normal save situations. Risk begins above 50 IP/season. EN 62 means larger pitch tank — could go 3 straight days. Solution: rotate Horton/Villanueva to keep Peters under 50IP.
+GENERAL: $150M+ payroll = curse. Stay under $125M. Player must stay in minors or upgrade cancels. Human trades first (increases SIM trade values). Voided SB contracts = cosmetic glitch.
+
+CURRENT ROSTER 2053:
+ROTATION: SP1 Hernandez (EN78,CO94,BP99,K85,ERA3.29) ACE. SP2 Torres (EN95,CO95,BP97,K86). SP3 Serrano (EN85,CO96,BP95,K79). SP4 Poole (EN87,CO92,BP95,K68). SP5 Lang (EN96,CO89,BP96,K44) PRIMARY TRADE CHIP. SP6 Skip.
+BULLPEN: LR Spence (EN73,CO90,BP99). MR1 Hancock (EN68,CO85,BP97). MR2 Glock (EN42,CO89,BP95) last season. SR/MR Villanueva (EN70,CO97,BP98) repurposed as MR - great relief numbers. SR Horton (EN55,CO98,BP96). CL Peters (EN62,CO87,BP99) — monitor 50IP max.
+MINORS PITCHING: Cisneros (EN79,CO86,BP95) ready as SP6 when Lang traded. Caldwell (SP prospect, DO NOT PROMOTE - upgrading until 09/10/2053). Others below threshold.
+
+LINEUP: 1-CF Walters (CH90,EYE67,CF77) NEW SIGNING. 2-2B Ford (CH90,PH89,EYE74) BEST HITTER. 3-DH Johnson (CH87,PH91,EYE85). 4-LF Lu (CH80,PH92,LF65) elite PH exception. 5-3B Hurst (CH87,PH68,EYE60). 6-RF Crosby (CH87,EYE87,RF81). 7-1B Ruiz (CH86,EYE95,1B81). 8-C González (CH87,EYE91,C81). 9-SS Becker (CH85,EYE98,SS70) 1yr bridge.
+BENCH: Johnson(C/DH), Barnett(2B,2B77), Horne(SS,SS70), Dorsey(SS,SS60), Clarke(CF,CF58,EYE79).
+MINORS POSITION: Douglas Marcus (3B upgrading DO NOT PROMOTE). Hill/Odonnell (SS prospects 2-3yr away). Howard Berkley (CF65 emergency depth). Rush Boris (C, in Sherman trade package).
+
+CONTRACTS VOIDED: Lugo (4yr $15.84M) and Cherry voided by developer.
+ACTIVE CONCERNS: Villanueva 6yr $5.8M/yr kept - repurposed as MR (CO97,BP98 elite in relief).
+
+PRIORITIES 2053:
+1. Lock Ford extension (4yr $3.71M) IMMEDIATELY - incredible value
+2. Monitor Peters under 50IP as closer
+3. Sherman deal: Rush+Byrd to SB Blue Sox for SS age22 EYE94 CH87 SS75 - long term SS
+4. Trade Lang (primary chip) - target closer arm (CO84+,BP94+,EN below40) 
+5. Clarke extension (4yr $4.49M) reasonable bench depth
+6. Hancock extension (4yr $3.65M) solid bullpen value
+7. Caldwell - DO NOT PROMOTE until 09/10/2053
+
+TRADE INTEL: STL Cardinals rebuilding, needs pitching badly - good Lang target. SB Blue Sox have Sherman. CAR Blue - traded Becker to us. CLE Bishops = developer's team. WPC Bass has Sanchez 3B PH94 but asked for Hernandez (too steep).
+
+Be direct, analytical, and decisive. Reference specific ratings and dev rules. Keep responses concise but complete. Use the GM's exact situation — never generic advice.`;
+
+let conversationHistory = [];
+let isLoading = false;
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function quickAsk(q) {
+  document.getElementById('ai-input').value = q;
+  sendMessage();
+}
+
+function handleScreenshot(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64 = e.target.result.split(',')[1];
+      const mediaType = file.type;
+      sendMessageWithImage(base64, mediaType);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function addMessage(role, content, isHtml = false) {
+  const messages = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : '');
+  const avatarLabel = role === 'user' ? 'GM' : 'AI';
+  const avatarClass = role === 'user' ? 'user' : 'ai';
+  if (isHtml) {
+    div.innerHTML = `<div class="msg-avatar ${avatarClass}">${avatarLabel}</div><div class="msg-bubble">${content}</div>`;
+  } else {
+    div.innerHTML = `<div class="msg-avatar ${avatarClass}">${avatarLabel}</div><div class="msg-bubble"></div>`;
+    div.querySelector('.msg-bubble').textContent = content;
+  }
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const messages = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function formatResponse(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n• /g, '<br>• ')
+    .replace(/\n- /g, '<br>• ')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = '';
+  sendToAI(text, null, null);
+}
+
+async function sendMessageWithImage(base64, mediaType) {
+  sendToAI('Please analyze this player screenshot and tell me if I should sign or trade for this player, evaluating against my roster needs and dev-confirmed thresholds.', base64, mediaType);
+}
+
+async function sendToAI(text, imageBase64, mediaType) {
+  if (isLoading) return;
+  isLoading = true;
+  document.getElementById('ai-send-btn').disabled = true;
+
+  addMessage('user', text);
+
+  const userMessage = { role: 'user', content: [] };
+  if (imageBase64) {
+    userMessage.content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } });
+  }
+  userMessage.content.push({ type: 'text', text: text });
+  if (!imageBase64) userMessage.content = text;
+
+  conversationHistory.push(userMessage);
+
+  showTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    hideTyping();
+
+    if (data.content && data.content[0]) {
+      const reply = data.content.map(b => b.text || '').join('');
+      conversationHistory.push({ role: 'assistant', content: reply });
+      addMessage('assistant', formatResponse(reply), true);
+    } else {
+      addMessage('assistant', 'Sorry, I had trouble connecting. Check your API setup and try again.', false);
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('assistant', 'Connection error. Make sure you are running this with API access.', false);
+  }
+
+  isLoading = false;
+  document.getElementById('ai-send-btn').disabled = false;
+}
+</script>
+</body>
+</html>
